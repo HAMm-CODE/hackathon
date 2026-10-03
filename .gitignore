@@ -8,3 +8,8 @@ out/pipeline_log.txt
 out/*_preview_*.png
 *.blend1
 .DS_Store
+# Roihu / SAM 2
+hpc/roihu/*.out
+out/sam2/slurm-*.out
+out/sam2/_frames_*/
+/sam2/
