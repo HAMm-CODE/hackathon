@@ -1,0 +1,19 @@
+SAM 2 racket-axis run 2026-10-03 17:56:16 on rg2101 (aarch64), frame offset 0
+torch 2.13.0+cu130, device cuda (NVIDIA GH200 120GB)
+model small: configs/sam2.1/sam2.1_hiera_s.yaml + sam2.1_hiera_small.pt, loaded in 0.8s
+[front] 29 frames 117..145 decoded in 0.2s, prompt: 4 clicks on frame 117 only
+[front] clicks only: tracked in 5.1s, 0 suspect frames []
+[front] trusted frames 29/29 (elongation >= 1.6), view done in 5.6s
+[rear] 29 frames 158..186 decoded in 0.1s, prompt: 4 clicks on frame 158 only
+[rear] clicks only: tracked in 1.2s, 9 suspect frames ['174', '175', '179', '181', '182', '183', '184', '185', '186']
+[rear] retry with negative wrist point [771.3, 403.5]: tracked in 1.3s, 6 suspect frames ['174', '175', '183', '184', '185', '186']
+[rear] keeping the retry with the wrist point
+[rear] trusted frames 23/29 (elongation >= 1.6), view done in 3.0s
+[front] clicks vs SAM on 29 trusted frames: median 2.9 deg, max 8.5 deg
+[rear] clicks vs SAM on 23 trusted frames: median 3.3 deg, max 16.9 deg
+  re-check front frame 126: clicks and SAM differ by -8.5 deg
+  re-check rear frame 172: clicks and SAM differ by -12.1 deg
+  re-check rear frame 173: clicks and SAM differ by -14.8 deg
+  re-check rear frame 176: clicks and SAM differ by -16.9 deg
+  re-check rear frame 177: clicks and SAM differ by -11.1 deg
+total 11.9s; outputs in /scratch/project_2020170/hackathon/out/sam2

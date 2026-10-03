@@ -48,9 +48,11 @@ swinq-swing-reconstruction/
     overlay.py         side-by-side overlay video
     build_viewer.py    fills viewer/template.html with the latest results
     anchor_qa.py       finds and fixes bad clicks
-    sam2_axis.py       optional: automatic racket axis with SAM 2 (independent check)
+    sam2_axis.py       racket axis per frame from SAM 2 masks (independent check; GPU, see hpc/roihu/)
+    validate_sam.py    clicks vs SAM 2 and sensor vs SAM 2, figure 4 (laptop, CPU)
     impact_location.py earlier impact-location script with a video cross-check
     paths.py           repo-relative paths
+  hpc/roihu/           SAM 2 setup and Slurm job for CSC Roihu (GH200)
   blender/
     render_racket.py   Blender scene and render from out/keyframes.json
   viewer/
@@ -69,15 +71,30 @@ swinq-swing-reconstruction/
 | Recovered true peak | 19.3 g (likely 16.9 to 21.7 g) |
 | Stress test (hide 77 ms of good data) | physics 1.59 g error, curve fitting 7.36 g, centripetal-only 28.27 g |
 | Noise test (5 deg/s noise + 3 deg/s bias) | 1.04 deg change at contact (worst 5%: 1.71 deg) |
-| Forward swing vs video, front | median 2.2 deg, mean 4.4 deg, max 27.4 deg |
-| Forward swing vs video, rear | median 2.1 deg, mean 6.0 deg, max 38.7 deg |
-| Follow-through vs video | 83.8 / 74.1 deg mean: low confidence |
+| Forward swing vs clicked video points, front | median 2.2 deg, mean 4.4 deg, max 27.4 deg |
+| Forward swing vs clicked video points, rear | median 2.1 deg, mean 6.0 deg, max 38.7 deg |
+| Forward swing vs SAM 2 axis (independent), front | median 5.0 deg, mean 6.9 deg, max 24.1 deg |
+| Forward swing vs SAM 2 axis (independent), rear | median 4.3 deg, mean 6.0 deg, max 32.0 deg |
+| Clicked points vs SAM 2 axis, forward swing | median 3.2 deg front, 2.6 deg rear |
+| Follow-through vs video | 83.8 / 74.1 deg mean vs clicks; 29.7 / 38.9 deg median vs SAM 2 (modulo 180 deg): low confidence |
 | Impact | sample 200; shock disturbs the gyro for 43.3 ms (detected from the vibration level and bridged) |
 
 Coach numbers: peak rotation 1720 deg/s (2.4 ms before contact),
 net rotation into contact 163 deg, roll about the handle -46 deg,
 forward swing 224 ms, head speed from racket rotation about the hand 37 km/h
 (the hand's own forward speed adds on top). The rotation centre sits at the grip.
+
+### Independent check with SAM 2 (figure 4)
+
+The camera fit is tuned on the clicked points, so "vs clicked points" is the optimistic number. SAM 2 (small model)
+segments the racket in both videos, prompted with the clicks on the first frame of each view only, and the long axis
+of each mask is an independent 2D racket axis. Masks with elongation below 1.6 are not trusted (front 29/29 trusted,
+rear 23/29). Against SAM 2 the sensor-only reconstruction is 4 to 5 deg median off over the forward swing,
+rising to 24 to 32 deg in the last ~70 ms before contact, the same pattern as against the clicks.
+The clicks themselves agree with SAM 2 to about 3 deg. The frames where they differ by more than 8 deg
+(front 126; rear 172, 173, 176, 177) are SAM errors on inspection: around contact the rear mask covers only the blurred head,
+and the front mask includes the hand. Run on one GH200 on CSC Roihu in 12 s (`hpc/roihu/README.md`); numbers in
+`out/sam2/sam_validation.json`, masks in `out/sam2/overlays/`.
 
 ## Known limits (say these out loud, judges respect it)
 
@@ -87,7 +104,10 @@ forward swing 224 ms, head speed from racket rotation about the hand 37 km/h
    front camera's angle for display only.
 2. After contact the gyro is disturbed by the impact shock, and the follow-through matches the video poorly.
 3. The best video sync offset sits at the one-frame limit in both views, so the impact frames may be off by a frame.
+   This may explain part of the error rise in the last ~70 ms before contact, which shows against both the clicks and SAM 2.
 4. Impact location (0.4 cm from the centre line) is experimental only.
+5. The SAM 2 check is 2D and modulo 180 deg: it cannot detect a butt/tip flip, and its axis is biased when the
+   racket head is seen face-on or blurred (rear view around contact).
 
 ## Open question for the organizers
 

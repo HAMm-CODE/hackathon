@@ -11,6 +11,9 @@ mkdir -p out
 "$PY" pipeline/figures.py
 "$PY" pipeline/overlay.py
 "$PY" pipeline/build_viewer.py
+if [ -f out/sam2/sam_axes.json ]; then           # figure 4, only after a SAM 2 run (hpc/roihu/)
+    "$PY" pipeline/validate_sam.py
+fi
 echo "Done. Results in out/, viewer in viewer/swing_viewer.html"
 echo "Blender preview: blender -b -P blender/render_racket.py -- --preview"
 echo "Blender video:   blender -b -P blender/render_racket.py"

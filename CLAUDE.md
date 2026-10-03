@@ -15,6 +15,8 @@ Key facts
 Commands
 - Full rebuild: `./run_all.sh` (writes out/ and viewer/swing_viewer.html)
 - Blender: `blender -b -P blender/render_racket.py -- --preview`, then without `--preview` for the mp4
+- SAM 2 referee (2D axis check only): `python pipeline/sam2_axis.py --check-only` on the laptop, full run on CSC Roihu
+  (hpc/roihu/README.md), then `python pipeline/validate_sam.py` (run_all.sh does this when out/sam2/sam_axes.json exists)
 - Paths are repo-relative through pipeline/paths.py; run scripts from anywhere.
 
 Style: keep results honest, keep numbers in out/results.json the single source of truth, do not hand-edit generated files.
