@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Swing reconstruction from the SWINQ sensor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--page:#F3F5F2;--ink:#13233A;--muted:#5B6B80;--rule:#D5DCE3;--court:#1D4F91;--court-deep:#173F75;--ball:#D4E157;--signal:#E8833A;--panel:#FFFFFF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0F1826;--ink:#E8EDF3;--muted:#9AA8B8;--rule:#253447;--panel:#152234}}
+:root[data-theme="dark"]{--page:#0F1826;--ink:#E8EDF3;--muted:#9AA8B8;--rule:#253447;--panel:#152234}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%}
+body{margin:0;min-height:100%;background:var(--page);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto minmax(0,1fr) auto;gap:0;height:100%}
+header{grid-column:1/3;display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 22px 10px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:28px;letter-spacing:.2px;margin:0;line-height:1.1}
+header p{margin:0;color:var(--muted);max-width:60ch}
+.stage{position:relative;background:var(--court);min-height:300px;overflow:hidden}
+.stage::before{content:"";position:absolute;left:6%;right:6%;bottom:14%;height:2px;background:rgba(243,245,242,.35)}
+.stage::after{content:"";position:absolute;left:50%;top:14%;bottom:14%;width:2px;background:rgba(243,245,242,.18)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+.readout{position:absolute;left:18px;top:16px;color:#F3F5F2;font-family:"Barlow Condensed","Arial Narrow",sans-serif;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.readout .t{font-size:44px;font-weight:700;line-height:1}
+.readout .row{display:flex;gap:22px;margin-top:6px;font-size:20px;font-weight:600}
+.readout .row span small{display:block;font-family:"Barlow",sans-serif;font-size:12px;font-weight:500;opacity:.8}
+.phase{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:3px;font-family:"Barlow",sans-serif;font-size:13px;font-weight:600;background:rgba(243,245,242,.16)}
+.phase.low{background:var(--signal);color:#2B1406}
+.views{position:absolute;right:14px;top:14px;display:flex;gap:6px}
+.views button,.controls button,.controls select{font:inherit;font-size:14px;font-weight:600;border-radius:4px;border:1px solid rgba(243,245,242,.45);background:rgba(23,63,117,.65);color:#F3F5F2;padding:6px 11px;cursor:pointer}
+.views button[aria-pressed="true"]{background:#F3F5F2;color:var(--court-deep)}
+.legend{position:absolute;left:18px;bottom:14px;color:#F3F5F2;font-size:12.5px;display:flex;gap:16px;flex-wrap:wrap;opacity:.9}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px}
+aside{grid-row:2/4;grid-column:2;border-left:1px solid var(--rule);background:var(--panel);padding:18px 20px 22px;overflow:auto}
+aside h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:20px;font-weight:600;margin:0 0 8px}
+.score{list-style:none;margin:0 0 22px;padding:0}
+.score li{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.score li:last-child{border-bottom:0}
+.score b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:26px;font-weight:700;white-space:nowrap}
+.score b em{font-style:normal;font-size:15px;font-weight:600;color:var(--muted);margin-left:2px}
+.score span{color:var(--ink)}
+.score small{grid-column:1/3;color:var(--muted);font-size:12.5px;line-height:1.35;margin-top:-2px}
+.note{font-size:13px;color:var(--muted);border-left:3px solid var(--signal);padding-left:10px;margin:0}
+.timeline{grid-column:1;padding:10px 22px 16px;border-top:1px solid var(--rule);background:var(--panel)}
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.controls button,.controls select{background:var(--court);border-color:var(--court)}
+.controls label{color:var(--muted);font-size:13px}
+#curve{width:100%;height:84px;display:block;cursor:pointer}
+#scrub{width:100%;margin:2px 0 0;accent-color:var(--court)}
+:focus-visible{outline:3px solid var(--ball);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.err{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:#F3F5F2;padding:30px;text-align:center}
+@media (max-width:860px){body{height:auto}.app{height:auto;grid-template-columns:1fr;grid-template-rows:auto 62vh auto auto}aside{grid-row:auto;grid-column:1;border-left:0;border-top:1px solid var(--rule)}.timeline{grid-column:1;order:3}aside{order:4}.readout{top:62px}.readout .t{font-size:34px}.views{left:14px;right:14px}.views button{flex:1;font-size:13px;padding:6px 6px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>One forehand, rebuilt from a dampener sensor</h1>
+  <p>Racket orientation comes from the gyroscope alone. The two videos were used only to check it.</p>
+</header>
+<section class="stage" aria-label="3D view of the racket">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="readout" aria-live="polite">
+    <div class="t" id="rt">0 ms</div>
+    <div class="row"><span id="rw">0<small>angular speed, °/s</small></span><span id="rv">0<small>head speed from rotation, km/h</small></span></div>
+    <div class="phase" id="rp">Forward swing</div>
+  </div>
+  <div class="views" role="group" aria-label="Camera">
+    <button data-view="front" aria-pressed="true">Front video angle</button>
+    <button data-view="rear" aria-pressed="false">Rear video angle</button>
+    <button data-view="free" aria-pressed="false">Free orbit</button>
+  </div>
+  <div class="legend"><span><i style="background:#D4E157"></i>tip path, brighter is faster</span><span><i style="background:#E8833A"></i>after contact, lower confidence</span><span><i style="background:rgba(243,245,242,.7)"></i>pose at contact</span><span><i style="background:#F3F5F2;height:9px;width:9px;border-radius:50%"></i>rotation centre (the hand)</span></div>
+  <div class="err" id="err">The 3D view needs WebGL, which this browser has turned off. The numbers on the right still hold.</div>
+</section>
+<aside>
+  <h2>The swing</h2>
+  <ul class="score" id="score"></ul>
+  <h2>How sure we are</h2>
+  <ul class="score" id="proof"></ul>
+  <p class="note">The follow-through is drawn but faded. The impact shock disturbs the gyroscope for about __SHOCK__ ms, and after contact the video agrees much less well. Face tilt is not shown: without a moment of rest in the recording, gravity cannot be separated from the hand's acceleration.</p>
+</aside>
+<section class="timeline" aria-label="Timeline">
+  <div class="controls">
+    <button id="play" aria-label="Pause">Pause</button>
+    <label for="speed">Playback</label>
+    <select id="speed"><option value="0.1">10% speed</option><option value="0.25" selected>25% speed</option><option value="1">Real time</option></select>
+    <label><input type="checkbox" id="ghost" checked> Show pose at contact</label>
+    <label><input type="checkbox" id="normal"> Show face direction</label>
+  </div>
+  <canvas id="curve" aria-hidden="true"></canvas>
+  <label class="sr" for="scrub">Sample</label>
+  <input type="range" id="scrub" min="0" max="399" value="0" step="1">
+</section>
+</div>
+<script>__DATA__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const S = SWING, N = S.q.length, IMP = S.impact, B1 = S.bridge[1], m = S.summary;
+const fmt = (x, d) => Number(x).toFixed(d || 0);
+
+// scoreboard
+const score = [
+  ["Peak rotation", fmt(m.peak), "°/s", "Reached " + fmt(2.4,1) + " ms before contact"],
+  ["Rotation into contact", fmt(m.rot), "°", "Net turn of the racket over the recorded forward swing"],
+  ["Roll about the handle", fmt(m.roll), "°", "Forearm turnover before contact"],
+  ["Forward swing", fmt(m.dur), "ms", "From 30% of peak rotation speed to contact"],
+  ["Head speed from rotation", fmt(m.head), "km/h", "Racket turning about the hand; the hand's own speed adds on top"]
+];
+const proof = [
+  ["Agreement with two cameras", fmt(m.vf,1) + " / " + fmt(m.vr,1), "°", "Median racket-angle error, front and rear view, forward swing"],
+  ["Saturated accelerometer", fmt(m.satpk,1), "g", fmt(m.satms) + " ms clipped at 16 g, rebuilt from the gyro (likely " + fmt(m.satr[0],0) + " to " + fmt(m.satr[1],0) + " g)"],
+  ["Stress test", fmt(m.st_phys,1), "g", "Error when we hide 77 ms of good data; curve fitting misses by " + fmt(m.st_poly,1) + " g"],
+  ["Noise robustness", fmt(m.noise,1), "°", "Orientation change at contact with 5 °/s noise and bias added (worst 5%: " + fmt(m.noise95,1) + "°)"]
+];
+function fill(id, rows){ document.getElementById(id).innerHTML = rows.map(r => `<li><span>${r[0]}</span><b>${r[1]}<em>${r[2]}</em></b><small>${r[3]}</small></li>`).join(""); }
+fill("score", score); fill("proof", proof);
+
+// readout
+const rt = document.getElementById("rt"), rw = document.getElementById("rw"), rv = document.getElementById("rv"), rp = document.getElementById("rp");
+function phase(i){ if (i < IMP - 1) return ["Forward swing", ""]; if (i <= IMP) return ["Contact", ""]; if (i <= B1) return ["Impact shock, gyroscope disturbed", "low"]; return ["Follow-through, lower confidence", "low"]; }
+
+// timeline curve
+const cv = document.getElementById("curve"), cx = cv.getContext("2d"), scrub = document.getElementById("scrub");
+const wmax = Math.max(...S.w) * 1.08;
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function drawCurve(i){
+  const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+  if (cv.width !== Math.round(W*dpr)) { cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); }
+  cx.setTransform(dpr,0,0,dpr,0,0); cx.clearRect(0,0,W,H);
+  const X = k => k / (N - 1) * W, Y = v => H - 14 - v / wmax * (H - 22);
+  cx.fillStyle = "rgba(232,131,58,.16)"; cx.fillRect(X(IMP), 0, X(B1) - X(IMP), H - 12);
+  let r0 = S.rec.indexOf(1), r1 = S.rec.lastIndexOf(1);
+  if (r0 >= 0) { cx.fillStyle = css("--muted"); cx.globalAlpha = .35; cx.fillRect(X(r0), H - 8, X(r1) - X(r0), 5); cx.globalAlpha = 1; }
+  cx.lineWidth = 2;
+  cx.beginPath(); for (let k = 0; k <= IMP; k++) { const x = X(k), y = Y(S.w[k]); k ? cx.lineTo(x,y) : cx.moveTo(x,y); } cx.strokeStyle = css("--court"); cx.stroke();
+  cx.beginPath(); for (let k = IMP; k < N; k++) { const x = X(k), y = Y(S.w[k]); k > IMP ? cx.lineTo(x,y) : cx.moveTo(x,y); } cx.strokeStyle = "#E8833A"; cx.stroke();
+  cx.strokeStyle = "#E8833A"; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(X(IMP), 0); cx.lineTo(X(IMP), H - 12); cx.stroke();
+  cx.fillStyle = css("--muted"); cx.font = "12px Barlow, sans-serif";
+  cx.fillText("contact", X(IMP) + 5, 12); cx.fillText("accelerometer clipped", Math.max(0, X(r0) - 128), H - 1);
+  cx.fillText("angular speed", 2, 12);
+  cx.fillStyle = css("--ink"); cx.fillRect(X(i) - 1, 0, 2, H - 12);
+}
+
+// state
+let idx = 0, playing = !matchMedia("(prefers-reduced-motion: reduce)").matches, speed = 0.25, last = null, acc = 0;
+const playBtn = document.getElementById("play");
+function setPlaying(p){ playing = p; playBtn.textContent = p ? "Pause" : "Play"; playBtn.setAttribute("aria-label", p ? "Pause" : "Play"); last = null; }
+setPlaying(playing);
+playBtn.onclick = () => setPlaying(!playing);
+document.getElementById("speed").onchange = e => { speed = parseFloat(e.target.value); };
+scrub.oninput = () => { setPlaying(false); idx = +scrub.value; update(); };
+function seekFromEvent(e){ const r = cv.getBoundingClientRect(); idx = Math.max(0, Math.min(N - 1, Math.round((e.clientX - r.left) / r.width * (N - 1)))); setPlaying(false); update(); }
+let dragging = false;
+cv.addEventListener("pointerdown", e => { dragging = true; cv.setPointerCapture(e.pointerId); seekFromEvent(e); });
+cv.addEventListener("pointermove", e => { if (dragging) seekFromEvent(e); });
+cv.addEventListener("pointerup", () => { dragging = false; });
+
+// 3D
+let renderer = null, scene, camera, controls, racket, ghost, trail, trailGeo, normalArrow;
+const stage = document.querySelector(".stage"), canvas = document.getElementById("gl");
+function makeRacket(opts){
+  const g = new THREE.Group(), inner = new THREE.Group(); g.add(inner);
+  inner.position.set(S.p[0], S.p[1], S.p[2]);         // body points sit at (point + p) relative to the hand pivot
+  const frameMat = new THREE.MeshStandardMaterial({ color: opts.frame, roughness: .45, metalness: .1, transparent: opts.opacity < 1, opacity: opts.opacity });
+  const tube = (a, b, r) => { const d = new THREE.Vector3().subVectors(b, a), L = d.length();
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, 14), frameMat);
+    m.position.copy(a).addScaledVector(d, .5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), d.normalize()); return m; };
+  const V = (x,y,z) => new THREE.Vector3(x,y,z||0);
+  const gripMat = new THREE.MeshStandardMaterial({ color: opts.grip, roughness: .8, transparent: opts.opacity < 1, opacity: opts.opacity });
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(.016, .016, .2, 14), gripMat);
+  handle.position.set(.29, 0, 0); handle.rotation.z = Math.PI / 2; inner.add(handle);
+  inner.add(tube(V(.19,0), V(.13,0), .013));
+  const cx0 = -0.133, a = .163, b = .125;
+  inner.add(tube(V(.13,0), V(.002,.07), .009)); inner.add(tube(V(.13,0), V(.002,-.07), .009));
+  const pts = []; for (let k = 0; k < 64; k++) { const th = k / 64 * Math.PI * 2; pts.push(V(cx0 + a*Math.cos(th), b*Math.sin(th))); }
+  inner.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 128, .009, 10, true), frameMat));
+  if (opts.strings) {
+    const sv = [];
+    for (let y = -b + .02; y < b; y += .018) { const s = Math.sqrt(1 - (y/b)**2) * a * .96; sv.push(cx0 - s, y, 0, cx0 + s, y, 0); }
+    for (let x = cx0 - a + .02; x < cx0 + a; x += .018) { const s = Math.sqrt(1 - ((x - cx0)/a)**2) * b * .96; sv.push(x, -s, 0, x, s, 0); }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.Float32BufferAttribute(sv, 3));
+    inner.add(new THREE.LineSegments(sg, new THREE.LineBasicMaterial({ color: 0xD4E157, transparent: true, opacity: .55 })));
+    const damp = new THREE.Mesh(new THREE.SphereGeometry(.012, 16, 12), new THREE.MeshStandardMaterial({ color: 0xE8833A }));
+    damp.position.set(0, 0, .006); inner.add(damp);
+  }
+  return { group: g, inner };
+}
+function initGL(){
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
+  catch (e) { document.getElementById("err").style.display = "flex"; return; }
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(28, 1, .01, 50);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x3a5a8a, .9));
+  const dl = new THREE.DirectionalLight(0xffffff, .8); dl.position.set(1, 2, 3); scene.add(dl);
+  const hand = new THREE.Mesh(new THREE.SphereGeometry(.03, 20, 14), new THREE.MeshStandardMaterial({ color: 0xF3F5F2, roughness: .6 }));
+  scene.add(hand);
+  racket = makeRacket({ frame: 0x22262B, grip: 0xF3F5F2, opacity: 1, strings: true }); scene.add(racket.group);
+  ghost = makeRacket({ frame: 0xF3F5F2, grip: 0xF3F5F2, opacity: .28, strings: false }); scene.add(ghost.group);
+  const qc = S.q[IMP - 1]; ghost.group.quaternion.set(qc[0], qc[1], qc[2], qc[3]);
+  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), vmax = Math.max(...S.v);
+  const lo = new THREE.Color(0x9DB8DC), hi = new THREE.Color(0xD4E157), post = new THREE.Color(0xE8833A), c = new THREE.Color();
+  for (let k = 0; k < N; k++) { pos.set(S.tip[k], k * 3);
+    if (k <= IMP) c.copy(lo).lerp(hi, Math.min(1, S.v[k] / vmax)); else c.copy(post).lerp(new THREE.Color(0x1D4F91), Math.min(.6, (k - IMP) / 400));
+    col.set([c.r, c.g, c.b], k * 3); }
+  trailGeo = new THREE.BufferGeometry(); trailGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); trailGeo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  trail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ vertexColors: true })); scene.add(trail);
+  normalArrow = new THREE.ArrowHelper(new THREE.Vector3(0,0,1), new THREE.Vector3(-0.133 + S.p[0], S.p[1], S.p[2]), .22, 0xE8833A, .05, .03);
+  normalArrow.visible = false; racket.group.add(normalArrow);
+  // frame the whole path
+  const box = new THREE.Box3().setFromBufferAttribute(trailGeo.attributes.position); box.expandByPoint(new THREE.Vector3());
+  const sphere = box.getBoundingSphere(new THREE.Sphere());
+  window._target = sphere.center; window._dist = sphere.radius / Math.tan(THREE.MathUtils.degToRad(14)) * 1.15;
+  if (THREE.OrbitControls) { controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.target.copy(sphere.center); }
+  setView("front"); resize();
+}
+function setView(v){
+  document.querySelectorAll(".views button").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === v ? "true" : "false"));
+  if (!renderer) return;
+  const T = window._target, D = window._dist;
+  if (v === "free") { camera.position.set(T.x + D*.7, T.y + D*.45, T.z + D*.6); camera.up.set(0,1,0); }
+  else { const c = S.cams[v], f = new THREE.Vector3(...c.forward).normalize(); camera.position.copy(T).addScaledVector(f, -D); camera.up.set(...c.up); }
+  camera.lookAt(T); if (controls) { controls.target.copy(T); controls.update(); }
+}
+document.querySelectorAll(".views button").forEach(b => b.onclick = () => setView(b.dataset.view));
+document.getElementById("ghost").onchange = e => { if (ghost) ghost.group.visible = e.target.checked; };
+document.getElementById("normal").onchange = e => { if (normalArrow) normalArrow.visible = e.target.checked; };
+function resize(){ if (!renderer) return; const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener("resize", () => { resize(); drawCurve(idx); });
+
+function update(){
+  const q = S.q[idx]; if (racket) { racket.group.quaternion.set(q[0], q[1], q[2], q[3]); trailGeo.setDrawRange(0, idx + 1);
+    racket.group.traverse(o => { if (o.material && o !== normalArrow.line && o !== normalArrow.cone) { o.material.transparent = idx > IMP; o.material.opacity = idx > IMP ? (o.type === "LineSegments" ? .3 : .6) : (o.type === "LineSegments" ? .55 : 1); } }); }
+  const ms = (idx - IMP) / S.fs * 1000;
+  rt.textContent = (ms > 0 ? "+" : "") + fmt(ms) + " ms";
+  rw.firstChild.nodeValue = fmt(S.w[idx]); rv.firstChild.nodeValue = idx <= IMP ? fmt(S.v[idx]) : "n/a";
+  const [ph, cls] = phase(idx); rp.textContent = ph; rp.className = "phase " + cls;
+  scrub.value = idx; drawCurve(idx);
+}
+function loop(ts){
+  if (playing) { if (last !== null) { acc += (ts - last) / 1000 * S.fs * speed; const n = Math.floor(acc); if (n) { acc -= n; idx = (idx + n) % N; update(); } } last = ts; }
+  if (controls) controls.update();
+  if (renderer) renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+if (window.THREE) initGL(); else document.getElementById("err").style.display = "flex";
+update(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

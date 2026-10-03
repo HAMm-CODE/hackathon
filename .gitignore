@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+out/arrays.npz
+out/_overlay_raw.mp4
+out/pipeline_log.txt
+out/*_preview_*.png
+*.blend1
+.DS_Store

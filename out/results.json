@@ -1,0 +1,553 @@
+{
+ "saturation": {
+  "first": 182,
+  "last": 199,
+  "n": 18,
+  "ms": 43.3
+ },
+ "impact": {
+  "sample": 200,
+  "t_s": 0.4808,
+  "shock_bridge_samples": 18,
+  "shock_bridge_ms": 43.3,
+  "pre_impact_gyro_noise_dps": 0.28
+ },
+ "stress_test": {
+  "8": {
+   "rigid body, fixed pivot": {
+    "n": 32,
+    "rmse": 3.52,
+    "max_err": 7.51
+   },
+   "rigid body + moving pivot": {
+    "n": 32,
+    "rmse": 1.59,
+    "max_err": 2.5
+   },
+   "centripetal regression (local)": {
+    "n": 32,
+    "rmse": 28.27,
+    "max_err": 61.87
+   },
+   "polynomial extrapolation (no physics)": {
+    "n": 32,
+    "rmse": 7.36,
+    "max_err": 12.2
+   }
+  },
+  "10": {
+   "rigid body, fixed pivot": {
+    "n": 12,
+    "rmse": 0.6,
+    "max_err": 1.08
+   },
+   "rigid body + moving pivot": {
+    "n": 12,
+    "rmse": 0.84,
+    "max_err": 1.17
+   },
+   "centripetal regression (local)": {
+    "n": 12,
+    "rmse": 2.48,
+    "max_err": 4.18
+   },
+   "polynomial extrapolation (no physics)": {
+    "n": 12,
+    "rmse": 2.81,
+    "max_err": 4.97
+   }
+  },
+  "12": {
+   "rigid body, fixed pivot": {
+    "n": 7,
+    "rmse": 1.05,
+    "max_err": 1.19
+   },
+   "rigid body + moving pivot": {
+    "n": 7,
+    "rmse": 1.14,
+    "max_err": 1.47
+   },
+   "centripetal regression (local)": {
+    "n": 7,
+    "rmse": 0.77,
+    "max_err": 1.27
+   },
+   "polynomial extrapolation (no physics)": {
+    "n": 7,
+    "rmse": 0.18,
+    "max_err": 0.32
+   }
+  },
+  "14": {
+   "rigid body, fixed pivot": {
+    "n": 3,
+    "rmse": 1.14,
+    "max_err": 1.2
+   },
+   "rigid body + moving pivot": {
+    "n": 3,
+    "rmse": 1.16,
+    "max_err": 1.25
+   },
+   "centripetal regression (local)": {
+    "n": 3,
+    "rmse": 0.33,
+    "max_err": 0.44
+   },
+   "polynomial extrapolation (no physics)": {
+    "n": 3,
+    "rmse": 0.11,
+    "max_err": 0.18
+   }
+  }
+ },
+ "saturation_recovery": {
+  "model": "rigid body + moving pivot (gyro drives it; gyro was never clipped)",
+  "peak_ax_g": 19.3,
+  "peak_range_g": [
+   16.9,
+   21.7
+  ],
+  "at_sample": 193
+ },
+ "orientation": {
+  "gyro_sign": 1.0,
+  "pivot_to_sensor_m": [
+   -0.294,
+   0.039,
+   -0.109
+  ],
+  "pivot_radius_m": 0.316,
+  "gravity_fit_norm_g": 1.23,
+  "note": "heading is unobservable without a magnetometer: +x is defined as the swing direction at contact"
+ },
+ "metrics": {
+  "peak_angular_speed_dps": 1720.0,
+  "peak_at_ms_before_contact": 2.4,
+  "angular_speed_at_contact_dps": 1720.0,
+  "rotational_head_speed_at_contact_kmh": 37.0,
+  "rotational_tip_speed_at_contact_kmh": 53.0,
+  "head_speed_note": "speed from the racket rotating about the hand (fitted pivot); the hand's own forward speed adds on top and is not observable without drift",
+  "rotation_window_start_to_contact_deg": 163.0,
+  "roll_about_long_axis_to_contact_deg": -46.0,
+  "forward_swing_duration_ms": 224.0
+ },
+ "gravity_dependent_metrics_NOT_RELIABLE": {
+  "reason": "no rest period in the 0.96 s window, so gravity cannot be separated from hand acceleration; the upright-camera check failed",
+  "face_tilt_at_contact_deg": 50.0,
+  "racket_axis_elevation_at_contact_deg": 38.5,
+  "swing_path_elevation_at_contact_deg": -44.8
+ },
+ "impact_location_experimental": {
+  "gyro_step_dps": [
+   328.0,
+   1325.0,
+   -394.0
+  ],
+  "across_face_offset_cm": 0.4,
+  "range_90_cm": [
+   0.3,
+   0.6
+  ],
+  "note": "free-body impulse model, sign of +Y side; the impact shock also disturbs the gyro, so treat as indicative"
+ },
+ "noise_test": {
+  "added": "white 5 deg/s + random bias up to 3 deg/s per axis, 120 runs",
+  "orientation_error_at_contact_deg": {
+   "median": 1.04,
+   "p95": 1.71
+  },
+  "orientation_error_at_end_deg": {
+   "median": 1.14,
+   "p95": 1.79
+  },
+  "head_speed_spread_kmh": 0.13
+ },
+ "validation": {
+  "front": {
+   "time_offset_samples": -14.0,
+   "edge_side": 1,
+   "forward_swing": {
+    "frames": 14,
+    "mean_axis_err_deg": 4.4,
+    "median": 2.2,
+    "max": 27.4,
+    "mean_point_err_px": 16.4
+   },
+   "follow_through_predicted": {
+    "frames": 15,
+    "mean_axis_err_deg": 83.8
+   },
+   "camera_roll_from_sensor_gravity_deg": 164.9,
+   "per_frame": [
+    {
+     "frame": 117,
+     "imu_sample": 5.9,
+     "axis_err_deg": 2.7,
+     "px": 17.7
+    },
+    {
+     "frame": 118,
+     "imu_sample": 19.7,
+     "axis_err_deg": 3.0,
+     "px": 11.5
+    },
+    {
+     "frame": 119,
+     "imu_sample": 33.6,
+     "axis_err_deg": 0.8,
+     "px": 12.6
+    },
+    {
+     "frame": 120,
+     "imu_sample": 47.5,
+     "axis_err_deg": 0.2,
+     "px": 9.5
+    },
+    {
+     "frame": 121,
+     "imu_sample": 61.3,
+     "axis_err_deg": 1.6,
+     "px": 11.5
+    },
+    {
+     "frame": 122,
+     "imu_sample": 75.2,
+     "axis_err_deg": -0.6,
+     "px": 9.3
+    },
+    {
+     "frame": 123,
+     "imu_sample": 89.1,
+     "axis_err_deg": 0.3,
+     "px": 13.2
+    },
+    {
+     "frame": 124,
+     "imu_sample": 102.9,
+     "axis_err_deg": 1.5,
+     "px": 11.3
+    },
+    {
+     "frame": 125,
+     "imu_sample": 116.8,
+     "axis_err_deg": 1.5,
+     "px": 9.5
+    },
+    {
+     "frame": 126,
+     "imu_sample": 130.7,
+     "axis_err_deg": 3.2,
+     "px": 18.4
+    },
+    {
+     "frame": 127,
+     "imu_sample": 144.5,
+     "axis_err_deg": 5.2,
+     "px": 11.8
+    },
+    {
+     "frame": 128,
+     "imu_sample": 158.4,
+     "axis_err_deg": 3.0,
+     "px": 20.4
+    },
+    {
+     "frame": 129,
+     "imu_sample": 172.3,
+     "axis_err_deg": -10.6,
+     "px": 30.6
+    },
+    {
+     "frame": 130,
+     "imu_sample": 186.1,
+     "axis_err_deg": -27.4,
+     "px": 42.9
+    },
+    {
+     "frame": 131,
+     "imu_sample": 200.0,
+     "axis_err_deg": -35.2,
+     "px": 48.4
+    },
+    {
+     "frame": 132,
+     "imu_sample": 213.9,
+     "axis_err_deg": -40.8,
+     "px": 51.9
+    },
+    {
+     "frame": 133,
+     "imu_sample": 227.7,
+     "axis_err_deg": -43.4,
+     "px": 46.3
+    },
+    {
+     "frame": 134,
+     "imu_sample": 241.6,
+     "axis_err_deg": 132.5,
+     "px": 66.2
+    },
+    {
+     "frame": 135,
+     "imu_sample": 255.5,
+     "axis_err_deg": 147.8,
+     "px": 112.8
+    },
+    {
+     "frame": 136,
+     "imu_sample": 269.3,
+     "axis_err_deg": 157.2,
+     "px": 140.1
+    },
+    {
+     "frame": 137,
+     "imu_sample": 283.2,
+     "axis_err_deg": 165.2,
+     "px": 138.0
+    },
+    {
+     "frame": 138,
+     "imu_sample": 297.1,
+     "axis_err_deg": 179.9,
+     "px": 114.0
+    },
+    {
+     "frame": 139,
+     "imu_sample": 310.9,
+     "axis_err_deg": -162.6,
+     "px": 87.0
+    },
+    {
+     "frame": 140,
+     "imu_sample": 324.8,
+     "axis_err_deg": -15.3,
+     "px": 65.4
+    },
+    {
+     "frame": 141,
+     "imu_sample": 338.7,
+     "axis_err_deg": 9.4,
+     "px": 51.1
+    },
+    {
+     "frame": 142,
+     "imu_sample": 352.5,
+     "axis_err_deg": 27.5,
+     "px": 48.8
+    },
+    {
+     "frame": 143,
+     "imu_sample": 366.4,
+     "axis_err_deg": 38.9,
+     "px": 62.3
+    },
+    {
+     "frame": 144,
+     "imu_sample": 380.3,
+     "axis_err_deg": 46.6,
+     "px": 72.6
+    },
+    {
+     "frame": 145,
+     "imu_sample": 394.1,
+     "axis_err_deg": 54.9,
+     "px": 86.6
+    }
+   ]
+  },
+  "rear": {
+   "time_offset_samples": -14.0,
+   "edge_side": -1,
+   "forward_swing": {
+    "frames": 14,
+    "mean_axis_err_deg": 6.0,
+    "median": 2.1,
+    "max": 38.7,
+    "mean_point_err_px": 11.2
+   },
+   "follow_through_predicted": {
+    "frames": 15,
+    "mean_axis_err_deg": 74.1
+   },
+   "camera_roll_from_sensor_gravity_deg": 111.2,
+   "per_frame": [
+    {
+     "frame": 158,
+     "imu_sample": 5.9,
+     "axis_err_deg": -4.4,
+     "px": 6.8
+    },
+    {
+     "frame": 159,
+     "imu_sample": 19.7,
+     "axis_err_deg": -2.0,
+     "px": 7.4
+    },
+    {
+     "frame": 160,
+     "imu_sample": 33.6,
+     "axis_err_deg": -0.9,
+     "px": 5.2
+    },
+    {
+     "frame": 161,
+     "imu_sample": 47.5,
+     "axis_err_deg": -3.9,
+     "px": 7.5
+    },
+    {
+     "frame": 162,
+     "imu_sample": 61.3,
+     "axis_err_deg": -2.6,
+     "px": 6.4
+    },
+    {
+     "frame": 163,
+     "imu_sample": 75.2,
+     "axis_err_deg": -2.2,
+     "px": 6.3
+    },
+    {
+     "frame": 164,
+     "imu_sample": 89.1,
+     "axis_err_deg": -0.2,
+     "px": 6.0
+    },
+    {
+     "frame": 165,
+     "imu_sample": 102.9,
+     "axis_err_deg": -1.9,
+     "px": 7.3
+    },
+    {
+     "frame": 166,
+     "imu_sample": 116.8,
+     "axis_err_deg": -1.4,
+     "px": 11.8
+    },
+    {
+     "frame": 167,
+     "imu_sample": 130.7,
+     "axis_err_deg": 0.7,
+     "px": 13.4
+    },
+    {
+     "frame": 168,
+     "imu_sample": 144.5,
+     "axis_err_deg": 1.5,
+     "px": 13.0
+    },
+    {
+     "frame": 169,
+     "imu_sample": 158.4,
+     "axis_err_deg": -3.3,
+     "px": 15.5
+    },
+    {
+     "frame": 170,
+     "imu_sample": 172.3,
+     "axis_err_deg": -19.8,
+     "px": 23.1
+    },
+    {
+     "frame": 171,
+     "imu_sample": 186.1,
+     "axis_err_deg": -38.7,
+     "px": 27.1
+    },
+    {
+     "frame": 172,
+     "imu_sample": 200.0,
+     "axis_err_deg": -51.0,
+     "px": 32.9
+    },
+    {
+     "frame": 173,
+     "imu_sample": 213.9,
+     "axis_err_deg": -55.9,
+     "px": 38.2
+    },
+    {
+     "frame": 174,
+     "imu_sample": 227.7,
+     "axis_err_deg": -64.2,
+     "px": 41.9
+    },
+    {
+     "frame": 175,
+     "imu_sample": 241.6,
+     "axis_err_deg": 113.1,
+     "px": 57.7
+    },
+    {
+     "frame": 176,
+     "imu_sample": 255.5,
+     "axis_err_deg": 128.2,
+     "px": 84.2
+    },
+    {
+     "frame": 177,
+     "imu_sample": 269.3,
+     "axis_err_deg": 136.8,
+     "px": 88.6
+    },
+    {
+     "frame": 178,
+     "imu_sample": 283.2,
+     "axis_err_deg": 143.3,
+     "px": 83.2
+    },
+    {
+     "frame": 179,
+     "imu_sample": 297.1,
+     "axis_err_deg": 146.8,
+     "px": 68.2
+    },
+    {
+     "frame": 180,
+     "imu_sample": 310.9,
+     "axis_err_deg": 161.2,
+     "px": 51.3
+    },
+    {
+     "frame": 181,
+     "imu_sample": 324.8,
+     "axis_err_deg": -49.7,
+     "px": 31.2
+    },
+    {
+     "frame": 182,
+     "imu_sample": 338.7,
+     "axis_err_deg": -20.7,
+     "px": 19.8
+    },
+    {
+     "frame": 183,
+     "imu_sample": 352.5,
+     "axis_err_deg": -3.2,
+     "px": 8.3
+    },
+    {
+     "frame": 184,
+     "imu_sample": 366.4,
+     "axis_err_deg": 0.2,
+     "px": 12.9
+    },
+    {
+     "frame": 185,
+     "imu_sample": 380.3,
+     "axis_err_deg": 12.9,
+     "px": 27.7
+    },
+    {
+     "frame": 186,
+     "imu_sample": 394.1,
+     "axis_err_deg": 24.2,
+     "px": 35.5
+    }
+   ]
+  }
+ }
+}
